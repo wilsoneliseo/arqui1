@@ -1,0 +1,41 @@
+* Descripcion
+Pequeños programas de 32 bits en ensamblador. Para ejecutarlos en
+arquitectura de 64 bits es necesario =gcc-multilib= (ver
+prerequisitos). Código para interfazar con lenguaje C, gracias a [[http://pacman128.github.io/pcasm/][Paul
+Carter]]:
+- =asm_io.asm=
+- =asm_io.inc=
+- =cdecl.h=
+- =driver.c=
+
+Interfazando con C evita trabajar los detalles del modo protegido de
+la computadora.
+  
+* Arquitectura
+- Ubuntu GNU/Linux
+- 64 bits
+
+* Prerequisitos
+#+BEGIN_SRC sh
+sudo apt-get install nasm
+sudo apt-get install gcc-multilib
+#+END_SRC
+
+También se necesita el compilador =gcc= y el programa
+=make=. Generalmente vienen instalados por defecto en los sistemas
+GNU/Linux.
+
+* Uso
+Compilando y/o ejecutando ejercicios en particular
+#+BEGIN_SRC sh
+make exercise1.run
+make exercise2.run
+...
+make exercise6.run
+#+END_SRC
+
+Compilando todo
+#+BEGIN_SRC sh
+make
+#+END_SRC
+
