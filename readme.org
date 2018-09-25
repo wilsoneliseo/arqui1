@@ -1,8 +1,15 @@
 * Descripcion
-Pequeños programas de 32 bits en ensamblador. Para ejecutarlos en
-arquitectura de 64 bits es necesario =gcc-multilib= (ver
-prerequisitos). Código para interfazar con lenguaje C, gracias a [[http://pacman128.github.io/pcasm/][Paul
-Carter]]:
+Apuntes de la clase de arquitectura de computadora 1 FIUSAC disponible
+en el archivo *notes.org*.
+
+Programas de 32 bits en ensamblador correspondientes a ejercicios
+sobre temas tratados en la sección de programación a bajo nivel del
+archivo ~notes.org~.
+
+Los ejercicios son nombrados como exercise1, exercise2... y así. Para
+ejecutarlos en arquitectura de 64 bits es necesario =gcc-multilib=
+(ver prerequisitos). Código para interfazar con lenguaje C, gracias a
+[[http://pacman128.github.io/pcasm/][Paul Carter]]:
 - =asm_io.asm=
 - =asm_io.inc=
 - =cdecl.h=

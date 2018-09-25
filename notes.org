@@ -1,0 +1,1274 @@
+#+TITLE: Arquitectura de computadoras 1. Notas de clase con Ing. Otto
+#+DATE: <2018-08-23 jue>
+#+AUTHOR: wls
+#+EMAIL: wilsoneliseogt@gmail.com
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline
+#+OPTIONS: author:t c:nil creator:comment d:(not "LOGBOOK") date:t
+#+OPTIONS: e:t email:nil f:t inline:t num:t p:nil pri:nil stat:t
+#+OPTIONS: tags:t tasks:t tex:t timestamp:t toc:t todo:t |:t
+#+CREATOR: Emacs 24.5.1 (Org mode 8.2.10)
+#+DESCRIPTION:
+#+EXCLUDE_TAGS: noexport
+#+KEYWORDS:
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+
+* CPU's de Intel
+** El CPU básico CISC/Von Neumann
+De la arquitectura Von Neumann se basa CISC
+
+CISC fue un efecto colateral de la arquitectura de Von Neumann.
+
+CISC es una corriente tecnológica, una especie de convención, que
+aglutina una serie de CPU's internamente ligada a Von Neumann.
+
+*** Arquitectura Von Neumann
+Tres características principales:
+
+1. Todo CPU desarrollado bajo una arquitecturan Von Neumann no tiene
+   capacidad de manejo paralelo de un área de /memoria para comando/ y
+   /para memoria para dato/.
+2. El diseño interno de los buses en un CPU de este tipo no permite
+   procesamiento paralelo en tiempo real.
+3. Los CPU's bajo esta arquitectura, cuando el ALU computa y genera
+   resultado, entonces ese resultado solo podía ir en un solo registro
+   llamado *acumulado*.
+
+*** Arquitectura CISC
+características bajo línea tecnológica CISC:
+
+1. Posee un lote de registros internos limitado
+2. Posee instrucciones a bajo nivel con sintáxis igual o muy parecida
+   a la existente en lenguajes de alto nivel. En otras palabras tiene
+   un set de instrucciones complejo. Complejo no se refiere a que sea
+   dificil de utilizar sino mas bien a que que compilador hace un
+   salto semantico corto de código de alto nivel a bajo.
+3. Un bus de comunicación interno no óptimo (que imposibilita el
+   procesamiento paralelo entre bloques digitales).
+
+En la actualidad no existe un procesamiento estrictamente en paralelo,
+solo procesamiento paralelo virtual más sin embargo no real.
+
+*** Arquitectura de un CPU básico (8 bits bus de dato) Von Neumann/C.I.S.C.
+#+BEGIN_EXAMPLE
+								       A1 A2 .. Ak  **
+								    	    ^
+	+-------------------------------------------------------------------+----------------------------------+
+	|          	       	               	       	     	       	    |  	      	      	               |
+	|          	       +---------------------------+ 	            |         	      	               |   |
+	|          	       |\                          | 	     +------+------+         +------------+    |   | |
+	|                      | -\   DECODIFICACIÓN       | 	     | Latch/Driver|       * | Registro   |    +---+ | |
+     	|                      |   -\                      |         +-------------+         | de acceso  |    |   | |
+     	|                      |     \   Es una memoria    | 	           ^                 | por soft-  |    |   |
+     RD-| 	       	       |      -\  ROM, con el set  |<--------------+---------------->| ware       |    |
+        |-\ 	       	       |        \  de instrucciones| 	           v                 |            |    |
+  WR---\|  --+--------+        |         -\  de bajo nivel | 	      +----------+           |            |    |
+        +--- |  L/D   |<-------|           -\              | 	      |  ALU (1) |           |     (4)    |    |
+MREQ ---+--- +--------+        |             \             | 	      | Corazón  |<------+   |            |    +------o Vcc
+       	|   ---/    	       |              -\           | 	      | del CPU  |       |   |            |    |
+   IO RE|--/         	       |                -\         | 	      +----------+       |   |            |    |
+	|                      |    (3)           \        | 	                         |   +------------+    |
+	|                      |                   -\      | 	       	       	      	 |    	               |
+	|                      |                     \     | 	       	       	      	 |    	               |
+	|                      |   CONTROL            -\   | 	       	       	      	 |    	               |
+	|                      |                        -\ | 	     +--------------+ 	 |    	               |<------
+	|                      |                          \| 	   * | Registros (2)|----+    	               |     Reloj
+	|                      +---------------------------+         | temporales   | 	 |    	               |
+	|                                                            +--------------+    |                     |
+	|                                                                                v                     |
+	|								  	 +-------------+       	       |
+	|                                                                        | Latch/Driver|               |
+	|                                                                        +-------------+               |
+	|                                                                               |                      |
+	+-------------------------------------------------------------------------------+----------------------+
+	                                                                                |
+     * Tres buses genericos de entrada y salida					      	v
+    ** Bus de direciones de k lineas                                                D0...Dm-1
+
+#+END_EXAMPLE
+
+Observaciones:
+ - Transferencia paralela
+ - Diferencia en la dinámica de uso
+ - Misma naturaleza electrónica
+ - (1) hecho con logica combinacional
+
+Conceptos:
+ - Registro :: almacenamiento de la tasa de transferencia más alta
+               conocida hasta el momento
+ - Latch/Driver :: es un memorizador que soporta mas tensión y la
+                   información se guarda haste que se sobreescriba o
+                   se corte la fuente de alimentación.
+
+¿Por qué los libros dicen que un CPU es 100% secuencial?. Porque no se
+refiere a la electronica digital del mismo si no mas bien a su
+filosifía de trabajo.
+
+*** ¿Qué es un bus?
+Es un conjunto de conexiones comunes que llevan el mismo tipo de
+información.
+
+*** Bus de datos
+Conjunto de líneas físicas que lleva información digital que será o
+fue (bidimensional) computada en el CPU. Al número de líneas que
+componen un bus se llama "anchura de bus" en el caso de bus de datos,
+la anchura del mismo le provee al CPU donde esta insertó y al tipo de
+computadora en el que se trabaja de una característica calidad
+absoluta.
+
+Cuando se se habla de /ancho de bus/ se refiere al número de líneas
+del bus de datos, dado que es el más importante porque de él depende
+el número de bits con que trabaja el ALU y el número de bits de los
+registros internos del CPU.
+
+Cuando tengo un bus de dato ancho, eso lo hace un buen CPU sin ningún
+relativismo[fn:1].
+
+*** Bus de dirección
+Conjunto de líneas físicas que llevan información digital por medio de
+la cual el CPU identifica una celda de memoria o puerto con el cual,
+necesita operar (lectura/escritura). La anchura del bus de dirección
+de índole matemático, con la cantidad de memoria máxima que ésta puede
+manejar:
+#+BEGIN_EXAMPLE
+Anchura de k líneas
+2^k = número máximo de celdas a conectar
+
+Por ejemplo:
+
+                     A1  A0
+                      |  |
+                      |  |       k=2
+                      |  |       m=8
+                      v  v
+                +--------------------------+
+    D0 -------->|             |            |
+    .           |             |            |
+    .           |     C0      |     C1     |
+    .           |             |            |
+                |             |            |
+                |-------------+------------|
+                |             |            |
+                |             |            |
+                |     C2      |     C3     |
+                |             |            |
+    D7 -------->|             |            |
+                +--------------------------+
+
+#+END_EXAMPLE
+
+Sincronización se refiere a cual será el orden de alguna operación:
+primero, segundo, tercero.
+
+Temporización se refiere en que tiempo se realiza las acciones: 10ns,
+5s.
+
+Sincronización y temporización de las líneas digitales correlacionadas
+en esta... El bus de control no genera algun tipo de cualificación ni
+cuantificación ni absoluta ni relativa.
+
+*** Ciclo de instrucción de un CPU (extensivo en todo tipo de CPU, excepto CPU's F.P.G.A.)
+#+BEGIN_VERSE
+*Ciclo de instrucción*: lapso de tiempo que le toma a un CPU en 
+desarrollar una orden o comando de inicio a fin.
+#+END_VERSE
+
+Directrices del CPU
+- Servirnos a nosotros mismos
+- Incansable
+- Nada inconcluso (no puede pasar)
+
+Recordado que es un ciclo de reloj. Un ciclo de reloj o período es la
+unidad de medidad utilizada por los fabricantes y es relativo no
+absoluto.
+#+BEGIN_EXAMPLE
+                                          
+      |                                                
+      |---+   +---+   +---+                            
+      |   |   |   |   |   |                            
+ -----+---+---+---+---+---+------- t(s)
+    0 |       |<----->|                                
+                  T=período de reloj (s)               
+                  T=1/f                                
+#+END_EXAMPLE
+
+El ciclo de instrucción o de trabajo se divide en:
+- Ciclo Busqueda ::  Período de tiempo en el cual el CPU va a mermoria a
+               buscar código de operacion de orden o comando  en
+               curso. Lo toma y se lo da a la unidad de
+               decodificación.
+- Ciclo de decodificación :: Lapso de tiempo que le toma a un CPU, en
+     interpretar el código de opreación recibido y saber que tiene que hacer.
+- Ciclo de ejecución :: Lapso de tiempo en el cual el CPU desarrolla
+     terminalmente el pedido.
+
+Ejemplo de un diagrama de tiempo, que muestra coutas de los ciclos de
+un CPU
+#+BEGIN_EXAMPLE
+       	       	 |     	     T					     
+     pasado    	 |     	 |<----->|				     					 
+   - infinito    |	     					     				 
+   <----        1|---+	 +---+   +---+   +---+   +---+   +---+   +---+   +---+-  +---+	 +---+   +---+	   futuro  
+  	         |   |	 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |	 |   |   |   |   + infinito
+       Reloj----0+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+----> t
+       	         |	 .   		 .		 .	     		 .
+ 		 |	 .   		 .		 .	     		 .
+                1|       +---------------.---------------.-----------------------+
+  Ciclo de       |       |    		 .               . 	     		 |
+  trabajo ------0+-------+---------------.---------------.-----------------------|--------------> t
+                 |     	 .		 .		 .	     		 .
+                 |	 .		 .		 .	     		 .		   Ciclo de ins-
+                 |       |<-----2T------>|<-----2T------>|<---------3T---------->|		   trucción de:
+                1|   	 |---------------+---------------+-----------------------+---------------+  A <-- A+B  
+Ciclos que com-  |       |   Búsqueda    |Decodificación |      Ejecución        |               |	       
+ponen el ciclo -0+-------+---------------+---------------+-----------------------+---------------+-----------> t 
+de trabajo       |						     
+                 |						     
+   			   T=Período de reloj (segundos)	     "períodos de reloj son enteros" porque
+			   T=1/f				      viene del cambio de estados del flip-flop:
+			   f=frecuencia del reloj en hertz	      solo son de dos tipos por nivel y por flanco
+#+END_EXAMPLE
+
+*** Tabla de desempeño de un CPU básico CISC/Von Neumann (8 bits bus dato)
+
+_Orden a analizar_: =A <-- A+B=
+
+Donde: A ó B son registros en el set de registros de aceso por
+software
+
+|----------------+-----------------------------------+------------------------------------|
+| ciclo          | Bloques hogazanes                 | Bloques trabajando                 |
+|----------------+-----------------------------------+------------------------------------|
+|                | * ALU                             | * Latch/Driver                     |
+|                | * Decodificación                  | * Registros de acceso por software |
+| Busqueda       |                                   | * Registros temporales             |
+|                |                                   | * Control                          |
+|----------------+-----------------------------------+------------------------------------|
+| Decodificación | * ALU                             | * Control                          |
+| (interpreta)   | * Latch/Driver                    | * Registros temporales             |
+|                | * Resigros de acceso por software | * Decodificación                   |
+|----------------+-----------------------------------+------------------------------------|
+|                | * Decodificación                  | * ALU                              |
+|                | * Latch/Driver                    | * Registros temporales             |
+| Ejecución      |                                   | * Registros de acceso por software |
+|                |                                   | * Control                          |
+|----------------+-----------------------------------+------------------------------------|
+
+** Historia de los CPU Intel
+** El CPU 80286
+II) Características:
+- Búsqueda :: exterior
+- Instrucción :: interpreta el software de bajo nivel
+- Ejecución :: e
+- Unidad de instrucción :: Es la novedad más importante, del cual
+     ningún microprocesador anterior tendría. Interpreta el modelo de
+     memoria del programador con el físico. Permitió  el /modo de
+     administración de memoria/. Los cuales son el Modos por
+     segmentación o real y Modo protegido. El modo protegido a su vez
+     habilitó el multiusuario y multiventana.
+  1. Modelo de memoria del programador:
+  2. Modelo de memoria físico:
+
+III) Se amplio el bus de datos y dirección
+
+IV) La adición en la unidades de bus e instrucción de dos reservorios
+matemáticos llamados *colas* (tatarabuelos de los hoy llamados caché)
+
+- Unidad de búsqueda -> _Cola de prebúsqueda_: guarda una copia de la
+  memoria de comando.
+- Unidad de instrucción -> _Cola de decodificación_ gestióna la que
+  estab en la cola de búsqueda. En vez de una copia realiza la digestión.
+
+El propósito de las colas fue brindar a las demás unidades autonomía
+en la ejecución de eventos reales o virtuales.
+
+Formas de aumentar la velocidad e un CPU:
+- aumentar la velocidad del reloj
+- ampliar el bus de datos
+- reingenieria, que fue lo que hizo Intel con este CPU.
+
+Repaso de conceptos:
+- L2 surgio por sobrecalentamiento del CPU.
+- Tecnología de fabricación TTL: es rápida pero calienta mucho.
+- El trapecio, en un diagrama de bloques, hace referencia de que ahí
+  se realizan operaciones ariteméticas.
+
+** Línea de desempeño de varias instrucciones para un CPU x86 (286)
+Instrucciones a realizar
+
+1. A <-- A+B
+2. C <-- A \cplus B
+3. M[IP] <-- C  (proceso externo)
+
+
+dónde: 
+
+- A, B, C, D, IP son registros del CPU de acceso por software,
+  ubicadas en la unidad de ejecución
+- + & \cplus son operadores aritméticos/lógicos a desarrollarse en el ALU
+- M[IP]; significa acceso a RAM externa a "M" a través de una variable
+  index "IP"
+
+#+BEGIN_EXAMPLE
+       	      +-------+-------+-------+-------+-------+----------	 			       
+Unidad de     | Busca | Busca | Busca | Busca | Busca |Escribir a RAM	 
+  Bus	      |  (1)  |  (2)  |  (3)  |  (4)  |  (5)  |lo del JAX IP 	 
+	      +-------+-------+-------+-------+-------+-----------  	 
+		     						    	 
+		      +-------+-------+-------+-------+-------+----------
+		      | Decod.|Decod. |Decod. |Decod. |	      |	 oscioso 
+Unidad de instrucción |  (1)  | (2)   | (3)   | (4)   |	      |     	 
+		      +-------+-------+-------+-------+-------+-----------
+		     		                		    	 
+		     	      +-------+-------+---------	    	 
+  		     	      |Ejecuta|Ejecuta|			    	 
+Unidad de ejecución  	      |  (1)  |  (2)  |oscioso		    	 
+  		   	      +-------+-------+----------	    	 
+		   						    	 
+	 	   			       +----------+-------------    
+Unidad de direccion			       |Genera la |                  
+					       |dirección |         	 
+					       |indexada  |         	 
+					       |por  IP	  |         	 
+					       +----------+--------------     
+#+END_EXAMPLE
+
+** Organización de los registros en los CPU's Intel x86 PII (Pentium II)
+
+*** Registros de propósito general
+Aparecen en el 99% de la sintaxis que el CPU maneja a bajo
+nivel. Compuesto por los registros: 
+1. *Acumulado*. La salida del ALU va a este registro. Constituye
+   evidencia de que el CPU es Von Neumann
+2. *Base*. Se llama así porque se usa como variable index
+3. *Contador*. Se llama así porque hay varias instrucciones que
+   involucran bucles en dónde estos llevan el número de ciclos.
+4. *Dato*. Se llama así porque es el encargado de ser variable index
+   de dirección de puerto.
+#+BEGIN_EXAMPLE
+LOTE DE REGISTROS DE PROPÓSITO GENERAL   
+
+   D_31            D_15    D_6 D_7   D_0
+    +----------------+----------------+
+EAX |                | AH    AX    AL |
+    +----------------+----------------+
+EBX |                | BH    BX    BL |
+    +----------------+----------------+
+ECX |                | CH    CX    CL |
+    +----------------+----------------+
+EDX |                | DH    DX    DL |
+    +----------------+----------------+
+                             |<------>|
+                               8 bits
+
+                     |<-------------->|
+                           16 bits
+
+    |<------------------------------->|
+                  32 bits
+
+NIBBLE=4 bits  <- utilizado muy antiguamente
+#+END_EXAMPLE
+
+*** Registros índices y apuntadores
+1. *Indices*. tarea miscelanea
+   - Registro indice *destino*. Solo existe en intel, vuelca
+        información.
+   - Registro indice *fuente*. Saca información
+2. *Apuntador*. Tiene que ver con la memoria stack
+   - Registro Apuntador *Base*
+   - Registro Apuntador *Stack*. Trabaja la memoria stack como LIFO
+
+#+BEGIN_EXAMPLE
+LOTE DE REGISTROS INDICES Y APUNTADORES
+		     .				     
+		     .				     
+   D_31         D_16 . D_15    	     D_0	     
+    +----------------+----------------+		     
+ESI |                | 	     SI       | Source Index 
+    +----------------+----------------+		     
+EDI |                | 	     DI       |	Destination Index
+    +----------------+----------------+		     	 
+EBP |                |       BP       |	Base Pointer   	 
+    +----------------+----------------+		     
+ESP |                | 	     SP       |	Stack Pointer
+    +----------------+----------------+
+    
+                     |<-------------->|
+                           16 bits
+    
+    |<------------------------------->|
+                  32 bits
+#+END_EXAMPLE
+
+*** Registros de segmento
+Su objetivo es coadyuvar a la unidad de dirección en la organización
+de la memoria.
+1. Registro de segmento de *código*. Encargado de identificar el
+   segmento de memoria desde dónde se carga el ejecutable.
+2. Registro de segmento de *dato*. Ayuda a la unidad de dirección a
+   manejar el área de trasiego[fn:2] de información.
+3. Registro de segmento de *dato extra*. Manejar memoria utilizada en
+   el trasiego de información extra al de datos.
+4. Registro de segmento de *pila*. Identifica  al área de memoria el
+   cual se maneja a travéz LIFO.
+
+#+BEGIN_EXAMPLE
+LOTE DE REGISTROS SEGMENTO
+    .		     .	  			     
+    . D_16       D_8 . D_7     	     D_0	     
+    +---------------------------------+		     
+    |               CS 	              | R. Code Segment	
+    +---------------------------------+		       	
+    |               DS 	              |	R. Data Segment
+    +---------------------------------+		       	 
+    |               ES                |	R. Extra Segment
+    +---------------------------------+		       	
+    |               SS 	              |	R. Stack Segment
+    +---------------------------------+
+    			     	  
+                     |<-------------->|
+                            8 bits
+    		    	    
+    |<------------------------------->|
+                   16 bits 
+
+R. = Register
+#+END_EXAMPLE
+
+*** Registros de Mantenimiento
+Se llaman de mantenimiento porque sin ellas la computadora perdería
+muchas capacidades.
+
+#+BEGIN_EXAMPLE
+LOTE DE REGISTROS DE MANTENIMIENTO
+    .		     .	  			     
+    . D_31      D_16 . D_15    	     D_0	     
+    +----------------+----------------+
+    |                | 	              |
+EIP |                |       IP       | R. Instruction Pointer
+    |                | 	              |			      
+    +----------------+----------------+			      
+    |                |                |	
+EF  |                |       F        |	R. Flags
+    |                | 	              |	
+    +----------------+----------------+
+    			     	  
+                     |<-------------->|
+                            16 bits
+    		    	    
+    |<------------------------------->|
+                   32 bits   
+
+R. = Register 
+#+END_EXAMPLE
+
+*REGISTRO DE APUNTADOR DE INSTRUCCIÓN*.
+Es la cadena binaria de salida sincrónico alimentado por pulsos de
+reloj. Apunta al siguiente código de operación en el segmento de
+código. Funciona como un contador binario sincrónico. Un contador
+binario sincrónico es /cíclico/ debido a ello se dice que un
+computador es cíclico.
+
+*REGISTRO DE BANDERAS*
+Conformado por flip-flop, sepuede consultar uno o dos bits de la
+cadena binaria. El nombre de cada bit viene del status del resultado
+de la última operación, aritmética o lógica, realizada por el CPU.
+
+En cada instrucción se sobreescribe uno o varios bits del registro de
+banderas.
+
+#+BEGIN_EXAMPLE
+FIGURA QUE MUESTRA LA ESTRUCTURA DE CADA CASILLA (BIT) DEL REGISTRO DE BANDERAS ENTRO DE UNA CPU INTEL 
+
+                                                                                  LSB
+	+-----+-----+---------+-----+---+---------+----+-------+--------+----+-----+		       
+  FLAG 	|     |	    |  	      |     | 	|	  |    |       |   	|    |	   |		       
+REGISTER|     |	... |Direccion|Tramp|Int|Over-flow|Sign|Partity|Auxiliar|Zero|Carry|		       
+16 bits |     |	    |	      |	    |   |         |    |       |Carry  	|    |     |		       
+	+-----+-----+---------+-----+---+---------+----+-------+--------+----+-----+		       
+					          ---	  /	  /	  \	  \	      _	       
+					      ---/	-/	-/	   \	   \	       |       
+				      	   --/	       /       /	    \	    \	       | Etiquetas
+					positive     Odd   Carry auxiliar   Zero    Carry      | booleanas
+					negative    Even  No Carry axiliar  No zero  No carry  o (verdadero,
+											       | falso)	    
+											       |       
+											      _| 
+#+END_EXAMPLE
+
+- Carry flag :: Activa cuando la ultima operación aritmética/logica produce
+                un acarreo
+- Zero flag :: Resultado de operación aritmética/lógica full-set
+- Auxiliar Flag :: Cuando hay sobreflujo de la cuarta a la quinta
+                   posición. Diseñado para trabajar con algoritmos
+- Partiy flag :: Paridad en uno (1 si es numero par), conteo de 1's en
+                 el resultado de una operación aritmético/lógico
+- Sign flag :: Cuando hay sobreflujo de números negativos
+- Overflow :: Cuando existe sobreflujo en alguna operación
+              aritmético/lógico. Solo Intel puede manejar
+              simultáneamente Zero flag y Overflow para números
+              negativos.
+
+Intel maneja los números negativos como lo maneja el ser humano
+operacionalmente. En contraste, Picaxy y Arduino manejan los números
+negativos en complemento a dos.
+
+Ejercicio. Ejecute la suma de los sigueintes números, e indique que
+valor binario asumirían las banderas: carry, zero, carry aux, parity,
+sign, over-flow.
+#+BEGIN_EXAMPLE
+Numero A = 7Fh
+Número B = 73h
+
+Pasando los números a binario y sumando
+   0 1 1 1   1 1 1 1
++  0 1 1 1   0 0 1 1
+---------------------
+   1 1 1 1   0 0 1 0
+
+Banderas:
+carry = 0
+zero = 0
+Carry aux = 1
+Parity = 0
+Sign = 1
+Over-flow = 1
+#+END_EXAMPLE
+
+** Administración de memoria modo segmentado
+Para trabajar un millon de celdas en memoria el programador a bajo nivel
+Intel invento:
+
+1. Area de memoria de código. Aqui se instala el programa para qwue
+   corra el ejecutable.
+2. Area de memoria de dato miscelaneo
+3. Area de memoria de dato extra
+4. Area de memoria de stack
+
+Para las cuatro áreas anteriores: 64kb=65536 celdas de 8 bits
+
+#+BEGIN_EXAMPLE
+	      SECCION O SEGMENTO  
+	    _  		      	  
+	   |  +---------------+	  
+	   |  |		      |	  
+	   |  |		      |	  
+Tamaño en  |  |8 bits = 1 byte|	  
+número de  o  |<------------->|	  
+celdas	   |  |		      |	  
+	   |  |		      |	  
+	   |  |		      |	  
+	   |_ +---------------+	  
+	     			  
+	       	       	       	  
+	  celdas c(16, 65536)	  
+		    /	 \	  
+		   /	  \	  
+               párrafo   64 Kbytes
+#+END_EXAMPLE
+
+Todos los contadores del CPU son cíclicos. Los segmentos de memoria
+que Intel propone poseen protección de frontera, por seguridad, si y
+solo si, el tamaño del segmento es de 64 Kbytes
+
+#+BEGIN_EXAMPLE
+	 	  +------------------+           
+	 	  |                  |           
+	 	  | ^                |           
+No hay regla a	  | .     Code       |           
+cerca del numero  | .                |           
+minimo de segmen- | .                |           
+tos que queremos  +-.----------------+           
+utilizar.      	  | .                |           
+		  | .                |           
+		  | .     Data       |           
+		  | .                |           
+		  | .                |           
+		  +-.----------------+           
+		  | .                |           
+		  | .                |           
+		  | .  Extra Data .........      
+		  | .             .  |    .      
+		  | .             .  |    .      
+		  +===-----------===-+    .      
+		  | .                |    .      
+Si no se	  | .                |    . Se se
+acota a 64k . . . > .     Stack  ^   |    . acota
+ 		  | .            .   |    .						   
+		  | .            .   |    .						   
+		  +--------------.---+    .						   
+		                 .        .						   
+	       	                 ..........						   
+#+END_EXAMPLE
+
+
+- Registros de segmento :: Su función es rotular las áreas de memoria
+  + CS rotula el área de código
+  + DS rotula el área de dato
+  + ES rotula el área de dato extra
+  + SS rotula el área de pila
+- Registro de desplazamiento :: Son aquellos registros capaces de
+     navegar por las cuatro áreas antes mencionadas libremente.
+
+TABLA QUE MUESTRA LAS PAREJAS VÁLIDAS DE REGISTRSO DE SEGMENTO Y
+DESPLAZAMIENTO INVOLUCRADOS EN LA ADMISTRACION DE MEMORIA DE LOS
+CPU'S INTEL
+|--------------------------------+-----------------------+-----------------------------|
+| PROPÓSITO                      | REGISTROS DE SEGMENTO | REGISTROS DE DESPLAZAMIENTO |
+|--------------------------------+-----------------------+-----------------------------|
+| área de segmento de código     | CS                    | IP                          |
+| área de segmento de dato       | DS                    | BX, DI, SI, número          |
+| área de segmento de dato extra | ES                    | DI (strings)                |
+| área de segmento de pila       | SS                    | SP, BP                      |
+|--------------------------------+-----------------------+-----------------------------|
+
+ECUACION UTILIZADA POR LA UNIDAD DE DIRECCION DE LOS CPU'S INTEL PARA
+CONCATENAR "MODELO DE MEMORIA DEL PROGRAMADOR" VERSUS "MODELO DE
+MEMORIA FISICA".
+#+BEGIN_EXAMPLE
+Posición
+de memoria  = (Registro de segmento ) * 10h  + Registro de desplazamiento
+fisica
+#+END_EXAMPLE
+
+El modelo de memoria del programador se refiere a como veo la
+memoria.
+
+El modelo de memoria fisica se refiere como en realidad está la
+memoria en forma física o a nivel de hardware. Es una posicion de
+memoria en placa madre.
+
+** Modos de direccionamiento
+
+
+* Programación a bajo nivel
+** Instrucciones de transferencia
+#+BEGIN_EXAMPLE
+MOV Destino, fuente
+#+END_EXAMPLE
+
+** Instrucciones aritméticas
+*** Suma
+- *Suma sin acarreo*
+  Es análogo a un sumador medio en electrónica digital, solo con
+  /carry out/.
+  #+BEGIN_EXAMPLE
+  ADD     sum1,	         sum2              
+       	   	       	     		       
+       +--------+     +---------+	       
+       |        |     |    |    |
+      CPU      MEM   CPU   |  Numero
+			   |   	 
+			  MEM
+
+
+    CPU ---> Registro 
+    MEM ---> Modo de direccionamiento
+             de datos, directo, por  
+             registro, relativo a          
+             base ...
+  #+END_EXAMPLE
+
+  Desarollo
+  #+BEGIN_EXAMPLE
+  Formato de trabajo destructivo. Es decir el primer operando o
+  destino es alterado al guardarse en él el resultado de la suma.
+
+                   sum1 <-- sum1 + sum2
+  #+END_EXAMPLE
+- *Suma con acarreo*
+  Es análogo al sumador completo en electrónica digital, con /carry
+  in=CF/ y también /carry out/.
+  #+BEGIN_EXAMPLE
+    ADC    sum1,           sum2
+                                                    
+         +--------+     +---------+
+         |        |     |    |    |
+        CPU      MEM   CPU   |  Numero
+                             |        
+                            MEM                                             
+  #+END_EXAMPLE
+
+  Desarollo
+  #+BEGIN_EXAMPLE
+  Formato de trabajo destructivo. Es decir el primer operando o
+  destino es alterado al guardarse en él el resultado de la suma.
+
+                   sum1 <-- sum1 + sum2 + CF
+  #+END_EXAMPLE
+
+- *Incremental*
+  #+BEGIN_EXAMPLE
+    INC      Target         
+                                                    
+           +--------+                                 
+           |        |                                 
+          CPU      MEM                                                    
+  #+END_EXAMPLE
+
+  Desarollo
+  #+BEGIN_EXAMPLE
+         Target <----  Target + 1
+  #+END_EXAMPLE
+  A esta instruccion no le está permitido afectar el /carry flag/.
+
+*** Resta
+- *Resta sin prestamo*
+  #+BEGIN_EXAMPLE
+    SUB     min,           sust
+                                                 
+         +--------+     +---------+              
+         |        |     |    |    |
+        CPU      MEM   CPU   |  Numero
+                             |     
+                            MEM
+
+    CPU ---> Registro 
+    MEM ---> Modo de direccionamiento
+             de datos, directo, por  
+             registro, relativo a          
+             base ...
+
+  #+END_EXAMPLE
+
+  Desarollo
+  #+BEGIN_EXAMPLE
+  Formato de trabajo destructivo. Es decir el primer operando o
+  destino es alterado al guardarse en él el resultado de la resta.
+
+                   min <-- min - sust
+
+  Ejemplo:
+  SUB EAX, EBX
+  EAX <-- EAX - EBX
+  #+END_EXAMPLE
+- *Resta con prestamo*
+  #+BEGIN_EXAMPLE
+    SBB     min,           sust
+                                                    
+         +--------+     +---------+
+         |        |     |    |    |
+        CPU      MEM   CPU   |  Numero
+                             |
+                            MEM
+  #+END_EXAMPLE
+
+  Desarollo
+  #+BEGIN_EXAMPLE
+  Formato de trabajo destructivo. Es decir el primer operando o
+  destino es alterado al guardarse en él el resultado de la resta.
+
+                   min <-- min - sust - CF
+
+  CF= carry flag
+
+  Ejemplo:
+  SUB CX, [BX+SI]
+  CL <-- CL - [DS*10+BX+SI] - CF
+  CH <-- CH - [DS*10+BX+SI+1]
+  #+END_EXAMPLE
+
+- *Resta no destructiva o comparación*
+  #+BEGIN_EXAMPLE
+  CMP       min,	          sust    
+		                  
+       +--------+      +---------+
+       |        |      |    |    |
+      CPU      MEM    CPU   |  Numero
+      		  	    | 
+			   MEM
+  #+END_EXAMPLE
+
+  Desarrollo
+  #+BEGIN_EXAMPLE
+     			 _	    
+ 	       	       	  |	    
+       	  min - sust	  |	    
+       	---------------	  |	    
+	       	      	  |	    
+	  Status del  	  |	    
+	  resultado 	  |	    
+	     | |    	  | No se crea 
+	     | |    	  o resultado  
+	    \| |/   	  | palpable
+	     \ /    	  |
+	      v     	  |
+	  +-------+ 	  |
+	  | FLAG  | 	  |
+	  +-------+ 	  |
+		   	 _|
+  #+END_EXAMPLE
+- *Resta incremental*
+  #+BEGIN_EXAMPLE
+    DEC      Target         
+                                                    
+           +--------+                                 
+           |        |                                 
+          CPU      MEM
+  #+END_EXAMPLE
+
+  Desarollo
+  #+BEGIN_EXAMPLE
+
+         Target <----  Target - 1
+
+  Ejemplo:
+  DEC BX
+  BX <-- BX - 1
+  #+END_EXAMPLE
+  A esta instruccion no le está permitido afectar el /carry flag/.
+
+** Instrucciones lógicas
+- *Multiplicación lógica*
+  #+BEGIN_EXAMPLE
+      AND    op1,    op2              +-----------------------------------------+
+                                      |                                         |
+    desarrollo:                       |                                         |
+    op1 <--- op1 ^ op2                |                                         |
+                                      |    +-------------------+                |
+    ejemplo:                          |    |                   |                |
+    AND <--- AH, CL                   |    |                   |                |
+    AH  <--- AH ^ CL                  |    |         +---------+----------------+--------------+
+                                      |    |         |                                         |
+    Si:                               |    |         |                                         |
+      AH  =  1 0 0 0    1 1 0 1  -----+    |         |                                         |
+                                           |         \                                         /
+      CL  =  1 1 1 1    1 1 1 0  ----------+          \                                       /
+                                                       \                                     /                       
+    ------------------------------                      \                                   /                        
+             1 0 0 0    1 1 0 0    <----------+          -\                               /-
+                                              |            -\                           /-
+                                              |              -\                       /-
+                                              |                ----\             /----
+                                              |                     -----+-------
+                                              |                          |
+                                              |                          |
+                                              +--------------------------+
+  #+END_EXAMPLE
+  Aplicación del nexo "Mo" al filtrado digital
+  #+BEGIN_EXAMPLE
+    PATRON DESCONOCIDO       X  X  X  X     X  X  X  X
+     
+    MASCARA                  0  0  0  0     1  1  1  1     
+                           -----------------------------  
+
+    RESULTADO FILTRADO       0  0  0  0     X  X  X  X
+  #+END_EXAMPLE
+
+- *Suma lógica (inclusiva)*
+  #+BEGIN_EXAMPLE
+    OR     op1,    op2                         +-----------------------------------------+                
+                                               |                                         |                
+    desarrollo:                                |                                         |                
+    op1 <--- op1 v op2                         |                                         |                
+                                               |    +-------------------+                |                
+    ejemplo:                                   |    |                   |                |            /-
+    OR  <--- BL, [SI]                          |    |          --       |                |          /- 
+    BL  <--- BL v [DS*10+SI]                   |    |         |  \-     |                |       /--    |
+                                               |    |         |    \-   |                |     /-       |
+    Si:                                        |    |         |      \- |                |  /--         |
+        BL        =   1 1 1 1    1 0 1 0  -----+    |         |        \+----            |/-            |
+                                                    |         \              \------------              /
+    [DS*10+SI]    =   0 0 1 1    0 0 1 1  ----------+          \                                       /
+                                                                \                                     /
+                     --------------------                        \                                   /
+                      1 1 1 1    1 0 1 1    <----------+          -\                               /-
+                                                       |            -\                           /-       
+                                                       |              -\                       /-         
+                                                       |                ----\             /----           
+                                                       |                     -----+-------                
+                                                       |                          |                       
+                                                       |                          |                       
+                                                       +--------------------------+                       
+  #+END_EXAMPLE
+  
+  Aplicación al filtrado digital
+  #+BEGIN_EXAMPLE
+    PATRON DESCONOCIDO       X  X  X  X     X  X  X  X
+                                        
+    MASCARA                  0  0  0  0     1  1  1  1     
+                           -----------------------------  
+                                        
+                             X  X  X  X     1  1  1  1
+  #+END_EXAMPLE
+
+- *Suma lógica exclusiva*
+  #+BEGIN_EXAMPLE
+    XOR    op1,    op2                                          
+                                                                
+    desarrollo:                                                 
+                  _                                             
+    op1 <--- op1 (+) op2                                        
+                                                                
+    ejemplo:                                                    
+    XOR AX, DX                                                  
+    AX  <--- AX (+) DX                                          
+                                                                
+                                                                
+        AX        =   1 1 0 1    0 0 0 0    0 0 1 1     0 1 0 1 
+                                                                
+        DX        =   0 0 0 0    1 1 1 0    1 1 0 0     1 0 1 0 
+                                                                
+                     -------------------------------------------
+                      1 1 0 1    1 1 1 0    1 1 1 1     1 1 1 1 
+
+  #+END_EXAMPLE
+
+  aplicación "XOR" al filtrado
+  #+BEGIN_EXAMPLE
+    PATRON DESCONOCIDO       X  X  X  X     X  X  X  X
+     
+    MASCARA                  0  0  0  0     1  1  1  1     
+                           -----------------------------  
+
+    RESULTADO FILTRADO       0  0  0  0     ~X ~X ~X ~X
+
+  #+END_EXAMPLE
+
+- *Multiplicación lógica no destructiva*
+  #+BEGIN_EXAMPLE
+    TEST      op1,            op2
+                                      
+           +--------+      +---------+
+           |        |      |    |    |
+          CPU      MEM    CPU   |  Numero
+                                | 
+                               MEM
+                      
+                      
+    desarrollo:                           
+                           _              
+                            |             
+            op1 ^ op2       |             
+          ---------------   |                                    
+                            |                                    
+            Status del      |                                    
+            resultado       |                                    
+               | |          | No se crea                         
+               | |          o resultado                          
+              \| |/         | palpable                           
+               \ /          |                                    
+                v           |                                    
+            +-------+       |                                    
+            | FLAG  |       |                                    
+            +-------+       |                                    
+                           _|                                    
+                                                                 
+
+    observaciones:
+    CPU ---> Se refiere a Registro 
+    MEM ---> Modo de direccionamiento
+             de datos, directo, por  
+             registro, relativo a          
+             base ...
+  #+END_EXAMPLE
+
+- *Complemento a uno*
+  #+BEGIN_EXAMPLE
+    NOT      Target                
+                                   
+           +--------+              
+           |        |              
+          CPU      MEM             
+                                   
+    desarrollo:                    
+                ______             
+    Target <--- Target             
+                                          
+                                   
+    ejemplo:                       
+    NOT AL                         
+            __                     
+    AL <--- AL                                   
+                                   
+                                   
+    Si:                            
+                                         
+      AL   =  0 1 0 1    0 1 1 0         
+     ----------------------------- 
+      AL   =  1 0 1 0    1 0 0 1         
+
+  #+END_EXAMPLE
+
+- *Complemento a dos*
+  #+BEGIN_EXAMPLE
+    NEG      Target                
+                                   
+           +--------+              
+           |        |              
+          CPU      MEM             
+                                   
+    desarrollo:                    
+                ______             
+    Target <--- Target + 1         
+                                          
+                                   
+    ejemplo:                       
+    NEG DX                         
+            __                     
+    DX <--- DX + 1                               
+                                   
+                                   
+    Si:                            
+                                         
+      DX   =  1 0 0 0    0 1 0 1    0 0 0 0    0 0 0 0
+     --------------------------------------------------
+      DX   =  0 1 1 1    1 0 1 1    0 0 0 0    0 0 0 0 
+
+  #+END_EXAMPLE
+** Instruciones de salto
+Saltar significa cambiar dirección (navegar), en la memoria de código.
+#+BEGIN_EXAMPLE
+	   ____        _ _        
+	  / ___|  __ _| | |_ ___  
+	  \___ \ / _` | | __/ _ \ 
+	   ___) | (_| | | || (_) |
+	  |____/ \__,_|_|\__\___/ 
+	       	       	       	  
+	 /		     \ 
+        /		      \
+       /		       \
+ o Condicionado	       	   o Absoluto: la dirección se coloca
+ o No condicionado	    	       sobre IP cuando se      
+			    	       compila 	       	       
+			   o Relativo: Se le suma o resta a IP,
+				       desde la posición actual
+
+
+
+						   
+INTRASEGMENTO:              INTERSEGMENTO:          
+No se puede salir           Puede salir del segmento
+dentro de memoria           de código               
+de código.                                          
+1. Corto (+-128)                                    
+2. Lejano                                           
+#+END_EXAMPLE
+
+- *No condicionado relativo*
+  #+BEGIN_EXAMPLE
+    JMP            Label      
+                -----+----    
+                     v        
+                   offset     
+                    /\        
+                   /  \          _
+              8 bits  16 bits     |números negativos
+               /\         /\      |por complemento                                
+              /  \       /  \     |a dos.           
+           +127 -127  +32k  -32k _|
+
+  #+END_EXAMPLE
+
+- *Condicionado Relativo*
+  #+BEGIN_EXAMPLE
+    JMP         flag,                         Label                          
+              ---------                    -----+----                        
+                  |                             |                            
+            +-----+-----+                     offset                         
+            |           |                      /\                            
+         Simples    Compuestas                /  \                           
+            |           |                8 bits  16 bits                     
+         +-----+    +-------+                                                
+         |     |    |       |  _                                             
+         Z     NZ   A       B   |# sin                                       
+         C     NC   AE      BE _|signo                                       
+         O     NO   |       |                                                
+                    |       |  _                                             
+                    G       L   |# con                                       
+                    GE      LE  |signo                                       
+                    E       NE _|                                            
+
+  #+END_EXAMPLE
+
+  desarrollo:
+  #+BEGIN_EXAMPLE
+    IP <--- IP + offset                                                                            
+
+               ^
+               |
+               +-----suma algebraica
+  #+END_EXAMPLE
+
+** Instrucciones de corrimiento
+#+BEGIN_EXAMPLE
+  NEMONICO             TARGET,          NUMERO DE CORRIMIENTOS 	   
+------------         -----------       ------------------------	   
+     |                    |                       |            	   
+    SHL             +-----+-----+           +-----+-----+      	   
+    SHR             |           |           |           |      	   
+    SAL            CPU         MEM         CPU       NUMERO    	   
+    SAR             |           |           |                  	   
+                REGISTROS     M.D.D.    REGISTRO CL            	   
+
+
+REGISTROS = AX,BX,ECX,...
+M.D.D. = Modo de direccionamiento de datos
+#+END_EXAMPLE
+
+1. *Lógico*
+   Se usa cuando se opera con numeros sin signo.
+
+   Corrimiento a la izquierda
+   #+BEGIN_EXAMPLE
+      ____  _   _ _       
+     / ___|| | | | |    _           
+     \___ \| |_| | |   (_)          
+      ___) |  _  | |___ _ 
+     |____/|_| |_|_____(_)
+                          
+      CF      MSB        TARGET         LSB
+     +--+    +---+---------------------+---+
+     |  |<---|   |    <----------      |   |<---- 0
+     +--+    +---+---------------------+---+
+   #+END_EXAMPLE
+
+   Corrimiento a la derecha
+   #+BEGIN_EXAMPLE
+      ____  _   _ ____                             
+     / ___|| | | |  _ \ _                          
+     \___ \| |_| | |_) (_)                         
+      ___) |  _  |  _ < _                          
+     |____/|_| |_|_| \_(_)                         
+                                                   
+              MSB        TARGET         LSB      CF
+             +---+---------------------+---+    +--+
+      0 ---->|   |    --------->       |   |--->|  |
+             +---+---------------------+---+    +--+
+
+   #+END_EXAMPLE
+
+2. *Aritmético*
+   Se usa cuando se opera números con signo ya el desplazamiento que
+   realiza mantiene estatico el bit de signo del número.
+
+   corrimiento aritmético a la izquierda
+   #+BEGIN_EXAMPLE
+      ____    _    _       
+     / ___|  / \  | |    _ 
+     \___ \ / _ \ | |   (_)
+      ___) / ___ \| |___ _ 
+     |____/_/   \_\_____(_)
+                           
+      CF      MSB       TARGET          LSB
+     +--+    +---+---------------------+---+
+     |  |<---|   |    <----------      |   |<---- 0
+     +--+    +---+---------------------+---+
+
+   #+END_EXAMPLE
+
+   corrimiento aritmético a la derecha
+   #+BEGIN_EXAMPLE
+      ____    _    ____    
+     / ___|  / \  |  _ \ _ 
+     \___ \ / _ \ | |_) (_)
+      ___) / ___ \|  _ < _ 
+     |____/_/   \_\_| \_(_)
+                                                   
+              MSB         TARGET        LSB      CF
+             +---+---------------------+---+    +--+
+       +---->|   |    --------->       |   |--->|  |
+       |     +---+---------------------+---+    +--+
+       |       |
+       |       | Si hay un 1 en MSB desplazará 
+       +-------+ insertando 1's. Si hay un 0 en MSB
+                 desplazará insertando 0's.        
+   #+END_EXAMPLE
+** Instrucciones de rotación
+#+BEGIN_EXAMPLE
+    NEMONICO             TARGET,          NUMERO DE ROTACIONES
+  ------------         -----------       ------------------------    
+       |                    |                       |                
+      RCL             +-----+-----+           +-----+-----+          
+      RCR             |           |           |           |          
+      ROL            CPU         MEM         CPU       NUMERO        
+      ROL             |           |           |                      
+                  REGISTROS     M.D.D.    REGISTRO CL                
+
+REGISTROS = AX,BX,ECX,...
+M.D.D. = Modo de direccionamiento de datos
+#+END_EXAMPLE
+
+- *Con acarreo*.
+  rotación a la izquierda con acarreo
+  #+BEGIN_EXAMPLE
+     ____   ____ _             
+    |  _ \ / ___| |    _       
+    | |_) | |   | |   (_)      
+    |  _ <| |___| |___ _       
+    |_| \_\\____|_____(_)      
+                               
+          CF        MSB       TARGET          LSB
+         +--+      +---+---------------------+---+
+      +--|  |<-----|   |    <----------      |   |<----+
+      |  +--+      +---+---------------------+---+     |
+      |                                                |
+      +------------------------------------------------+
+  #+END_EXAMPLE
+
+  rotación a la derecha con acarreo
+  #+BEGIN_EXAMPLE
+     ____   ____ ____    
+    |  _ \ / ___|  _ \ _ 
+    | |_) | |   | |_) (_)
+    |  _ <| |___|  _ < _ 
+    |_| \_\\____|_| \_(_) 
+                                                   
+             MSB         TARGET        LSB        CF 
+            +---+---------------------+---+      +--+
+      +---->|   |    --------->       |   |----->|  |
+      |     +---+---------------------+---+      +--+
+      |                                            |
+      |                                            |
+      +--------------------------------------------+
+  #+END_EXAMPLE
+- *Sin acarreo*.
+  rotación a la izquierda sin acarreo
+  #+BEGIN_EXAMPLE
+     ____   ___  _       
+    |  _ \ / _ \| |    _ 
+    | |_) | | | | |   (_)
+    |  _ <| |_| | |___ _ 
+    |_| \_\\___/|_____(_)
+                         
+          CF        MSB       TARGET          LSB
+         +--+      +---+---------------------+---+
+         |  |<-----|   |    <----------      |   |<----+
+         +--+   |  +---+---------------------+---+     |
+                |                                      |
+                +--------------------------------------+
+  #+END_EXAMPLE
+
+  rotación a la derecha sin acarreo
+  #+BEGIN_EXAMPLE
+     ____   ___  ____    
+    |  _ \ / _ \|  _ \ _ 
+    | |_) | | | | |_) (_)
+    |  _ <| |_| |  _ < _ 
+    |_| \_\\___/|_| \_(_)
+                                                     
+             MSB         TARGET        LSB        CF 
+            +---+---------------------+---+      +--+
+      +---->|   |    --------->       |   |----->|  |
+      |     +---+---------------------+---+  |   +--+
+      |                                      |
+      |                                      |
+      +--------------------------------------+
+  #+END_EXAMPLE
+** Retardos
+** Instrucciones de entrada y salida, I/O
+** Aplicación a diseño integrado
+* Miscelaneo
+** Métodos de atención a I/O's
+** Modo de administracion memoria protegida (importante)
+** Buses
+** CISC versus RISC
+
+* Footnotes
+
+[fn:1] Relativismo significa que el conocimiento carece de una validez
+absoluto o universal, por el contrario, sólo es válido según el contexto.
+
+[fn:2] Acción y resultado de trastornar, revolver.
+
